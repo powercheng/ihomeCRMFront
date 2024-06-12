@@ -1,7 +1,7 @@
 <!-- src/components/CustomerList.vue -->
 <template>
     <div>
-      <div class="container">
+        <div class="container">
             <TableCustom :columns="columns" :tableData="tableData" :total="page.total" :viewFunc="handleView"
                 :delFunc="handleDelete" :page-change="changePage" :editFunc="handleEdit">
                 <template #toolbarBtn>
@@ -9,31 +9,29 @@
                 </template>
             </TableCustom>
         </div>
-        <el-dialog v-width=80 :title="isEdit ? '编辑' : '新增'" v-model="visible" width="700px" destroy-on-close
-            :close-on-click-modal="false" @close="closeDialog">
-            <TableEdit :form-data="rowData" :options="options" :edit="isEdit" :update="updateData" />
+        <el-dialog title="新增" v-model="visible" width="900px" destroy-on-close :close-on-click-modal="false"
+            @close="closeDialog">
+            <TableEdit :form-data="rowData" :options="options" :update="saveData" />
         </el-dialog>
         <el-dialog title="查看详情" v-model="visible1" width="700px" destroy-on-close>
             <TableDetail :data="viewData"></TableDetail>
         </el-dialog>
-      
+
     </div>
-  </template>
+</template>
   
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { Customer } from '@/types/user';
-import { ElMessage } from 'element-plus';
+import { ElMessage, FormInstance } from 'element-plus';
 import { CirclePlusFilled } from '@element-plus/icons-vue';
-import { fetchUserData } from '@/api';
 import TableCustom from '@/components/table-custom.vue';
 import TableDetail from '@/components/table-detail.vue';
 import TableSearch from '@/components/table-search.vue';
 import { FormOption, FormOptionList } from '@/types/form-option';
-
-
+import axios from 'axios';
 
 
 const router = useRouter();
@@ -66,8 +64,9 @@ const page = reactive({
     total: 0,
 })
 const tableData = ref<Customer[]>([]);
+// 获取所有用户
 const getData = async () => {
-    const res = await fetchUserData()
+    const res = await axios.get('/customer/list');
     tableData.value = res.data.list;
     page.total = res.data.pageTotal;
 };
@@ -78,42 +77,49 @@ const changePage = (val: number) => {
     getData();
 };
 
-// 新增/编辑弹窗相关
+// 新增弹窗相关
 let options = ref<FormOption>({
     labelWidth: '100px',
     span: 12,
     list: [
-        { type: 'input', label: 'name', prop: 'name'},
+        { type: 'input', label: 'name', prop: 'name' },
         { type: 'input', label: 'contact', prop: 'contact' },
-        { type: 'input', label: 'address', prop: 'address'},
-        { type: 'input', label: 'assignee', prop: 'assignee' },
-        { type: 'upload', label: 'house image', prop: 'houseImage'},
-        { type: 'upload', label: 'house 2', prop: '2'},
-        { type: 'upload', label: 'house 3', prop: '3'},
-        { type: 'upload', label: 'house 4', prop: '4'}
+        { type: 'input', label: 'address', prop: 'address' },
+        { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
+        { type: 'input', label: 'sales Rep', prop: 'salesRep' },
     ]
 })
 const visible = ref(false);
-const isEdit = ref(false);
 const rowData = ref({});
-const handleEdit = (row: Customer) => {
-    rowData.value = { ...row };
-    isEdit.value = true;
-    visible.value = true;
-};
-const updateData = () => {
+const saveData = async (formEl: FormInstance | undefined) => {
+    console.log(formEl);
+    try {
+        const response = await axios.post('/customer/save', formEl);
+        ElMessage.success('success');
+    } catch (error) {
+        ElMessage.error("save failed");
+    }
     closeDialog();
     getData();
 };
 
 const closeDialog = () => {
     visible.value = false;
-    isEdit.value = false;
 };
 
 
+// 编辑相关
+const handleEdit = (row: Customer) => {
+    rowData.value = { ...row };
+    visible.value = true;
+};
+
+
+
+
+
 const viewCustomerDetail = (id: number) => {
-  router.push(`/customer/${id}`);
+    router.push(`/customer/${id}`);
 };
 
 

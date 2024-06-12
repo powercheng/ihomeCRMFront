@@ -3,11 +3,11 @@
         <div class="login-container">
             <div class="login-header">
                 <img class="logo mr10" src="../../assets/img/logo.svg" alt="" />
-                <div class="login-title">后台管理系统</div>
+                <div class="login-title">Customer Management</div>
             </div>
             <el-form :model="param" :rules="rules" ref="login" size="large">
                 <el-form-item prop="username">
-                    <el-input v-model="param.username" placeholder="用户名">
+                    <el-input v-model="param.username" placeholder="username">
                         <template #prepend>
                             <el-icon>
                                 <User />
@@ -16,7 +16,8 @@
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
-                    <el-input type="password" placeholder="密码" v-model="param.password" @keyup.enter="submitForm(login)">
+                    <el-input type="password" placeholder="password" v-model="param.password"
+                        @keyup.enter="submitForm(login)">
                         <template #prepend>
                             <el-icon>
                                 <Lock />
@@ -25,12 +26,13 @@
                     </el-input>
                 </el-form-item>
                 <div class="pwd-tips">
-                    <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
+                    <el-checkbox class="pwd-checkbox" v-model="checked" label="remember password" />
                     <!--        <el-link type="primary" @click="$router.push('/reset-pwd')">忘记密码</el-link>   -->
                 </div>
-                <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)">登录</el-button>
+                <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)">Sign</el-button>
                 <p class="login-text">
-                    没有账号？<el-link type="primary" @click="$router.push('/register')">立即注册</el-link>
+                    Don't have an account?<el-link type="primary" @click="$router.push('/register')">Create an
+                        account</el-link>
                 </p>
             </el-form>
         </div>
@@ -64,11 +66,19 @@ const rules: FormRules = {
     username: [
         {
             required: true,
-            message: '请输入用户名',
+            message: 'please input username',
             trigger: 'blur',
         },
     ],
-    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    name: [
+        {
+            required: true,
+            message: 'please input name',
+            trigger: 'blur',
+        },
+    ],
+    password: [{ required: true, message: 'please input password', trigger: 'blur' }],
+
 };
 const permiss = usePermissStore();
 const login = ref<FormInstance>();
@@ -84,8 +94,10 @@ const submitForm = (formEl: FormInstance | undefined) => {
                     username: username,
                     password: password,
                 });
-                ElMessage.success('登录成功');
+                console.log('success');
+                ElMessage.success('success');
                 localStorage.setItem('vuems_name', param.username);
+                localStorage.setItem('token', response.data.token);
                 const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
                 permiss.handleSet(keys);
                 router.push('/');
@@ -96,11 +108,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 }
             }
             catch (error) {
-                ElMessage.error("登陆失败，账户或者密码错误");
+                ElMessage.error("login failed, invalid username or password");
             }
-        } else {
-            ElMessage.error('登录失败');
-            return false;
         }
     });
 };

@@ -20,5 +20,7 @@ export interface Customer {
 export interface Register {
     username: string;
     password: string;
-    region: string;
+    region: number;
+    name: string;
+    email: string;
 }

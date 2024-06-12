@@ -3,7 +3,7 @@
         <!-- 折叠按钮 -->
         <div class="header-left">
             <img class="logo" src="../assets/img/logo.svg" alt="" />
-            <div class="web-title">后台管理系统</div>
+            <div class="web-title">customer management system</div>
             <div class="collapse-btn" @click="collapseChage">
                 <el-icon v-if="sidebar.collapse">
                     <Expand />
@@ -23,7 +23,7 @@
                 <div class="btn-icon" @click="router.push('/ucenter')">
                     <el-tooltip
                         effect="dark"
-                        :content="message ? `有${message}条未读消息` : `消息中心`"
+                        :content="message ? `有${message}条未读消息` : `Message`"
                         placement="bottom"
                     >
                         <i class="el-icon-lx-notice"></i>
@@ -88,6 +88,7 @@ const router = useRouter();
 const handleCommand = (command: string) => {
     if (command == 'loginout') {
         localStorage.removeItem('vuems_name');
+        localStorage.removeItem('token');
         router.push('/login');
     } else if (command == 'user') {
         router.push('/ucenter');

@@ -3,11 +3,11 @@
         <div class="login-container">
             <div class="login-header">
                 <img class="logo mr10" src="../../assets/img/logo.svg" alt="" />
-                <div class="login-title">客户管理系统</div>
+                <div class="login-title">Customer Management</div>
             </div>
             <el-form :model="param" :rules="rules" ref="register" size="large">
                 <el-form-item prop="username">
-                    <el-input v-model="param.username" placeholder="用户名">
+                    <el-input v-model="param.username" placeholder="username">
                         <template #prepend>
                             <el-icon>
                                 <User />
@@ -18,7 +18,7 @@
                 <el-form-item prop="password">
                     <el-input
                         type="password"
-                        placeholder="密码"
+                        placeholder="password"
                         v-model="param.password"
                         @keyup.enter="submitForm(register)"
                     >
@@ -29,16 +29,34 @@
                         </template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="所属区域" prop="region">
-                        <el-select v-model="param.region" placeholder="请选择">
-                            <el-option key="san francisco" label="san francisco" value="san francisco"></el-option>
-                            <el-option key="san jose" label="san jose" value="san jose"></el-option>
-                            <el-option key="sacramento" label="sacramento" value="sacramento"></el-option>
+                <el-form-item prop="name">
+                    <el-input v-model="param.name" placeholder="name">
+                        <template #prepend>
+                            <el-icon>
+                                <User />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="email">
+                    <el-input v-model="param.email" placeholder="email">
+                        <template #prepend>
+                            <el-icon>
+                                <User />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="region" prop="region">
+                        <el-select v-model="param.region" placeholder="please choose">
+                            <el-option key="1" label="san francisco" value="1"></el-option>
+                            <el-option key="2" label="san jose" value="2"></el-option>
+                            <el-option key="3" label="sacramento" value="3"></el-option>
                         </el-select>
                     </el-form-item>
-                <el-button class="login-btn" type="primary" size="large" @click="submitForm(register)">注册</el-button>
+                <el-button class="login-btn" type="primary" size="large" @click="submitForm(register)">Create an Account</el-button>
                 <p class="login-text">
-                    已有账号，<el-link type="primary" @click="$router.push('/login')">立即登录</el-link>
+                    Already have an account<el-link type="primary" @click="$router.push('/login')">Sign in</el-link>
                 </p>
             </el-form>
         </div>
@@ -55,6 +73,8 @@ const router = useRouter();
 const param = reactive<Register>({
     username: '',
     password: '',
+    name: '',
+    email:'',
     region: '',
 });
 
@@ -62,12 +82,13 @@ const rules: FormRules = {
     username: [
         {
             required: true,
-            message: '请输入用户名',
+            message: 'please input username',
             trigger: 'blur',
         },
     ],
-    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-    region: [{ required: true, message: '请选择区域', trigger: 'blur' }],
+    password: [{ required: true, message: 'please input password', trigger: 'blur' }],
+    name: [{ required: true, message: 'please input name', trigger: 'blur' }],
+    region: [{ required: true, message: 'please choose region', trigger: 'blur' }],
 };
 const register = ref<FormInstance>();
 const submitForm = (formEl: FormInstance | undefined) => {
@@ -75,26 +96,28 @@ const submitForm = (formEl: FormInstance | undefined) => {
     formEl.validate(async (valid: boolean) => {
         if (valid) {
             try {
-                const { username, password, region } = param;
-                console.log(username);
-                
+                const { username, password, name, email, region } = param;                
                 const response = await axios.post('/register', {
                     username: username,
                     password: password,
+                    name: name,
+                    email: email,
                     region: region
                 });
                 if (response.status === 200) {
-                    ElMessage.success('注册成功，请登录');
+                    ElMessage.success('success');
                     router.push('/login');
                 } else {
                     ElMessage.error(response.data);
                 }
             } catch (error) {
-                ElMessage.error('注册失败');
-                console.error('注册失败:', error.message);
+                if (error.response) {
+                    ElMessage.error(error.response.data);
+                } else {
+                    ElMessage.error('register failed');
+                }
+
             }
-        } else {
-            return false;
         }
     });
 };
