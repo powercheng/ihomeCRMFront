@@ -1,10 +1,10 @@
 
 export interface User {
     id: number;
-    name: string;
+    username: string;
     password: string;
-    region: string;
-    date: string;
+    email: string;
+    region: number;
 }
 
 export interface Customer {
@@ -12,15 +12,15 @@ export interface Customer {
     name: string;
     contact: string;
     address: string;
+    cac: number;
+    salesRep: string;
     status: number;
-    assignee: string;
 }
 
 
 export interface Register {
     username: string;
     password: string;
-    region: number;
-    name: string;
     email: string;
+    region: number;
 }

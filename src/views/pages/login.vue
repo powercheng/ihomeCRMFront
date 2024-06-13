@@ -70,13 +70,6 @@ const rules: FormRules = {
             trigger: 'blur',
         },
     ],
-    name: [
-        {
-            required: true,
-            message: 'please input name',
-            trigger: 'blur',
-        },
-    ],
     password: [{ required: true, message: 'please input password', trigger: 'blur' }],
 
 };
@@ -98,6 +91,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 ElMessage.success('success');
                 localStorage.setItem('vuems_name', param.username);
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('coworkers', response.data.coworkers);
                 const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
                 permiss.handleSet(keys);
                 router.push('/');

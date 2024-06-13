@@ -29,15 +29,6 @@
                         </template>
                     </el-input>
                 </el-form-item>
-                <el-form-item prop="name">
-                    <el-input v-model="param.name" placeholder="name">
-                        <template #prepend>
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
                 <el-form-item prop="email">
                     <el-input v-model="param.email" placeholder="email">
                         <template #prepend>
@@ -73,7 +64,6 @@ const router = useRouter();
 const param = reactive<Register>({
     username: '',
     password: '',
-    name: '',
     email:'',
     region: '',
 });
@@ -96,11 +86,10 @@ const submitForm = (formEl: FormInstance | undefined) => {
     formEl.validate(async (valid: boolean) => {
         if (valid) {
             try {
-                const { username, password, name, email, region } = param;                
+                const { username, password, email, region } = param;                
                 const response = await axios.post('/register', {
                     username: username,
                     password: password,
-                    name: name,
                     email: email,
                     region: region
                 });

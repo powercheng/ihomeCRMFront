@@ -1,4 +1,18 @@
 <template>
+	        <el-steps
+    class="mb-4"
+    style="max-width: 800px; margin-bottom: 20px;"
+    :space="100"
+    :active="1"
+    simple
+	
+  >
+    <el-step title="create"  />
+    <el-step title="measure"  />
+    <el-step title="design"  />
+    <el-step title="produce"  />
+    <el-step title="install"  />
+  </el-steps>
 	<el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth">
 		<el-row>
 			<el-col :span="options.span" v-for="item in options.list">
@@ -14,16 +28,33 @@
 					</el-select>
 					<el-date-picker v-else-if="item.type === 'date'" type="date" v-model="form[item.prop]"
 						:value-format="item.format"></el-date-picker>
+					<el-date-picker
+						v-else-if="item.type === 'datetime'" type="datetime" v-model="form[item.prop]"
+						:value-format="item.format"
+      				></el-date-picker>
+
+
+
 					<el-switch v-else-if="item.type === 'switch'" v-model="form[item.prop]"
 						:active-value="item.activeValue" :inactive-value="item.inactiveValue"
 						:active-text="item.activeText" :inactive-text="item.inactiveText"></el-switch>
-					<el-upload v-else-if="item.type === 'upload'" class="avatar-uploader" action="#"
-						:show-file-list="false" :on-success="handleAvatarSuccess">
-						<img v-if="form[item.prop]" :src="form[item.prop]" class="avatar" />
-						<el-icon v-else class="avatar-uploader-icon">
+
+
+					<el-upload v-else-if="item.type === 'upload'" 
+						class="avatar-uploader" 
+						multiple 
+						:show-file-list="true"
+						:auto-upload="false"
+
+						>
+
+						<el-icon class="avatar-uploader-icon">
 							<Plus />
 						</el-icon>
 					</el-upload>
+
+
+					
 					<slot :name="item.prop" v-else>
 
 					</slot>
@@ -32,7 +63,8 @@
 		</el-row>
 
 		<el-form-item>
-			<el-button type="primary" @click="saveEdit(formRef)">保 存</el-button>
+			<el-button type="primary" @click="saveEdit(formRef)" style="margin-right: 20px;">save</el-button>
+			<el-button type="primary" @click="submitEdit(formRef)">submit to next</el-button>
 		</el-form-item>
 	</el-form>
 </template>
@@ -41,8 +73,9 @@
 import { FormOption } from '@/types/form-option';
 import { FormInstance, FormRules, UploadProps } from 'element-plus';
 import { PropType, ref } from 'vue';
+import axios from 'axios';
 
-const { options, formData, edit, update } = defineProps({
+const { options, formData, edit, update, updateWithStatus } = defineProps({
 	options: {
 		type: Object as PropType<FormOption>,
 		required: true
@@ -56,6 +89,10 @@ const { options, formData, edit, update } = defineProps({
 		required: false
 	},
 	update: {
+		type: Function,
+		required: true
+	},
+	updateWithStatus: {
 		type: Function,
 		required: true
 	}
@@ -81,9 +118,23 @@ const saveEdit = (formEl: FormInstance | undefined) => {
 	});
 };
 
-const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-	form.value.thumb = URL.createObjectURL(uploadFile.raw!);
+const submitEdit = (formEl: FormInstance | undefined) => {
+	if (!formEl) return;
+	formEl.validate(valid => {
+		if (!valid) return false;
+		updateWithStatus(form.value);
+	});
 };
+
+
+
+
+
+
+
+
+
+
 
 </script>
 

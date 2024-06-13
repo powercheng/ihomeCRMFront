@@ -24,7 +24,7 @@
 import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
 import { CirclePlusFilled } from '@element-plus/icons-vue';
-import { User } from '@/types/user';
+import { User, Customer } from '@/types/user';
 import { fetchUserData } from '@/api';
 import TableCustom from '@/components/table-custom.vue';
 import TableDetail from '@/components/table-detail.vue';
@@ -84,9 +84,11 @@ const visible = ref(false);
 const isEdit = ref(false);
 const rowData = ref({});
 const handleEdit = (row: User) => {
+    console.log(row);
     rowData.value = { ...row };
     isEdit.value = true;
     visible.value = true;
+    console.log(rowData.value);
 };
 const updateData = () => {
     closeDialog();
