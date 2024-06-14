@@ -85,7 +85,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return;
     formEl.validate(async (valid: boolean) => {
         if (valid) {
-            try {
                 const { username, password, email, region } = param;                
                 const response = await axios.post('/register', {
                     username: username,
@@ -93,20 +92,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
                     email: email,
                     region: region
                 });
-                if (response.status === 200) {
-                    ElMessage.success('success');
-                    router.push('/login');
-                } else {
-                    ElMessage.error(response.data);
-                }
-            } catch (error) {
-                if (error.response) {
-                    ElMessage.error(error.response.data);
-                } else {
-                    ElMessage.error('register failed');
-                }
-
-            }
+                ElMessage.success('success');
+                router.push('/login');
         }
     });
 };

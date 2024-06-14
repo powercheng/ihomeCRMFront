@@ -1,6 +1,6 @@
 import { User } from "./user";
 
-interface JwtPayload {
+export interface JwtPayload {
     sub: string;
     user: User;
     iat: number;

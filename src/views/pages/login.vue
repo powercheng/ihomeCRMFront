@@ -79,7 +79,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return;
     formEl.validate(async (valid: boolean) => {
         if (valid) {
-            try {
+
                 const { username, password } = param;
                 console.log(username);
 
@@ -88,10 +88,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
                     password: password,
                 });
                 console.log('success');
+                console.log(response);
                 ElMessage.success('success');
                 localStorage.setItem('vuems_name', param.username);
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('coworkers', response.data.coworkers);
+                localStorage.setItem('token', response.data.data.token);
+                localStorage.setItem('coworkers', response.data.data.coworkers);
                 const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
                 permiss.handleSet(keys);
                 router.push('/');
@@ -100,10 +101,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 } else {
                     localStorage.removeItem('login-param');
                 }
-            }
-            catch (error) {
-                ElMessage.error("login failed, invalid username or password");
-            }
+            
+ 
         }
     });
 };

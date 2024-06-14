@@ -5,7 +5,7 @@
             <TableCustom :columns="columns" :tableData="tableData" :total="page.total" :viewFunc="handleView"
                 :delFunc="handleDelete" :page-change="changePage" :editFunc="handleEdit">
                 <template #toolbarBtn>
-                    <el-button type="warning" :icon="CirclePlusFilled" @click="handleSave">新增</el-button>
+                    <el-button type="warning" :icon="CirclePlusFilled" @click="handleSave">New</el-button>
                 </template>
             </TableCustom>
         </div>
@@ -14,10 +14,9 @@
 
 
 
-        <el-dialog :title="isEdit ? '编辑' : '新增'" v-model="visible" width="900px" destroy-on-close
-            :close-on-click-modal="false" @close="closeDialog">
-            <TableEdit :form-data="rowData" :options="options" :edit="isEdit" :update="saveData"
-                :updateWithStatus="submitData" />
+        <el-dialog v-model="visible" width="900px" destroy-on-close :close-on-click-modal="false" @close="closeDialog">
+            <TableEdit :form-data="rowData" :options="options" :update="saveData" :updateWithStatus="submitData"
+                :changeVol="changeVol" />
         </el-dialog>
         <el-dialog title="查看详情" v-model="visible1" width="900px" destroy-on-close>
             <el-steps class="mb-4" style="max-width: 800px" :space="100" :active="1" simple>
@@ -35,9 +34,9 @@
 
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { Customer, User } from '@/types/user';
+import { Customer, statusMapping, reverseStatusMapping } from '@/types/user';
 import { ElMessage, FormInstance } from 'element-plus';
 import { CirclePlusFilled } from '@element-plus/icons-vue';
 import TableCustom from '@/components/table-custom.vue';
@@ -45,12 +44,9 @@ import TableDetail from '@/components/table-detail.vue';
 import TableSearch from '@/components/table-search.vue';
 import { FormOption, FormOptionList } from '@/types/form-option';
 import axios from 'axios';
-import { JwtPayload } from '@/types/JwtPayload';
-import { jwtDecode } from 'jwt-decode';
 
 
 const router = useRouter();
-const isEdit = ref(false);
 // 查询相关
 const query = reactive({
     name: '',
@@ -61,12 +57,12 @@ const searchOpt = ref<FormOptionList[]>([
 const handleSearch = () => {
     changePage(1);
 };
-const coWorkers = localStorage.getItem('coworkers');
-const usernmae = localStorage.getItem('vuems_name');
 
-// 表格相关
+
+
+// 表格header相关
 let columns = ref([
-    { type: 'index', label: 'id', width: 55, align: 'center' },
+    { type: 'index', label: 'id', width: 50 },
     { prop: 'name', label: 'name' },
     { prop: 'contact', label: 'contact' },
     { prop: 'address', label: 'address' },
@@ -74,24 +70,26 @@ let columns = ref([
     { prop: 'salesRep', label: 'sales Rep' },
     { prop: 'measurer', label: 'measurer' },
     { prop: 'designer', label: 'designer' },
-    { prop: 'note', label: 'note', width: 250 },
-    { prop: 'operator', label: '操作', width: 250 },
+    { prop: 'statusString', label: 'status' },
+    { prop: 'operator', label: 'operaton', width: 250 },
 
 ])
-
+// 获取所有用户, 保存到tableData中，以及分页处理
 const page = reactive({
     index: 1,
     size: 10,
     total: 0,
 })
 const tableData = ref<Customer[]>([]);
-// 获取所有用户
 const getData = async () => {
     const res = await axios.get('/customer/list');
-    console.log(res);
-    tableData.value = res.data;
+    tableData.value = res.data.data.map(item => ({
+        ...item,
+        statusString: statusMapping[item.status as number] || item.status,
+        vol: statusMapping[item.status as number] || item.status,
+    }));
     page.total = res.data.pageTotal;
-    console.log(tableData);
+
 };
 getData();
 
@@ -99,66 +97,124 @@ const changePage = (val: number) => {
     page.index = val;
     getData();
 };
+
+// dialog 里面内容
+const coWorkers = localStorage.getItem('coworkers');
+const usernmae = localStorage.getItem('vuems_name');
+// coworker select process
 const opts = coWorkers.split(',').map(username => ({
     key: username,
     value: username,
     label: username
 }));
 // 初始化 options
-let options = ref<FormOption>({
-    labelWidth: '100px',
-    span: 12,
-    list: [
-        { type: 'input', label: 'name', prop: 'name' },
-        { type: 'input', label: 'contact', prop: 'contact' },
-        { type: 'input', label: 'address', prop: 'address' },
-        { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
-        { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
-    ]
-});
-
-
-
+let options = ref<FormOption>();
 
 const visible = ref(false);
 const rowData = ref({});
 //save a customer
 const saveData = async (formEl: FormInstance | undefined) => {
-    console.log(formEl);
-    try {
-        const response = await axios.post('/customer/save', formEl);
-        ElMessage.success('success');
-    } catch (error) {
-        ElMessage.error("save failed");
-    }
-    closeDialog();
+    const response = await axios.post('/customer/save', formEl);
+    ElMessage.success('success');
+    visible.value = false;
     getData();
 };
 //save a customer with status++
 const submitData = async (formEl: FormInstance | undefined) => {
     formEl.status++;
-    try {
-        const response = await axios.put('/customer/' + formEl.id, formEl);
-        ElMessage.success('success');
-    } catch (error) {
-        ElMessage.error("save failed");
-    }
-    closeDialog();
+    const response = await axios.post('/customer/save', formEl);
+    ElMessage.success('success');
+    visible.value = false;
     getData();
 };
 
 const closeDialog = () => {
     visible.value = false;
-    isEdit.value = false;
 };
 
-
-// save open function
+// open dialog by new button
 const handleSave = () => {
+    rowData.value = { id: 0, status: 1 };
+    options.value = {
+        labelWidth: '150px',
+        span: 12,
+        list: [
+            { type: 'input', label: 'name', prop: 'name' },
+            { type: 'input', label: 'contact', prop: 'contact' },
+            { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
+            { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
+            { type: 'select', label: 'measurer', prop: 'measurer', opts: opts },
+            { type: 'input', label: 'address', prop: 'address' },
+            { type: 'datetime', label: 'date', prop: 'measuredAt', placeholder: "measure time" },
+            { type: 'textarea', label: 'note', prop: 'note' }
+        ]
+    };
     visible.value = true;
 };
 
-// 编辑相关
+const changeVol = (val: string) => {
+    console.log(val);
+    const vol = reverseStatusMapping[val]
+    if (vol == 1) {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'input', label: 'name', prop: 'name' },
+                { type: 'input', label: 'contact', prop: 'contact' },
+                { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
+                { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
+                { type: 'select', label: 'measurer', prop: 'measurer', opts: opts },
+                { type: 'input', label: 'address', prop: 'address' },
+                { type: 'datetime', label: 'date', prop: 'measuredAt', placeholder: "measure time" },
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        };
+    } else if (vol == 2) {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'upload', label: 'measure files', prop: 'measureFiles' },
+                { type: 'input', label: 'price range', prop: 'priceRange' },
+                { type: 'select', label: 'designer', prop: 'designer', opts: opts },
+                { type: 'textarea', label: 'note', prop: 'note' },
+            ]
+        };
+    } else if (vol == 3) {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'upload', label: 'design files', prop: 'designFiles' },
+                { type: 'input', label: 'sale price', prop: 'salePrice' },
+                { type: 'upload', label: 'order files', prop: 'orderFiles', opts: opts },
+                { type: 'input', label: 'order note', prop: 'orderNote' },
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        };
+    } else if (vol == 4) {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'upload', label: 'final files', prop: 'finalFiles' },
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        };
+    } else {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        }
+    }
+   
+};
+//const initialFiles = ref({});
+// open dialog by edit button
 const handleEdit = (row: Customer) => {
     if (row.status == 1) {
         options.value = {
@@ -171,7 +227,8 @@ const handleEdit = (row: Customer) => {
                 { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
                 { type: 'select', label: 'measurer', prop: 'measurer', opts: opts },
                 { type: 'input', label: 'address', prop: 'address' },
-                { type: 'datetime', label: 'measure date', prop: 'measuredAt' }
+                { type: 'datetime', label: 'date', prop: 'measuredAt', placeholder: "measure time" },
+                { type: 'textarea', label: 'note', prop: 'note' }
             ]
         };
     } else if (row.status == 2) {
@@ -179,22 +236,45 @@ const handleEdit = (row: Customer) => {
             labelWidth: '100px',
             span: 12,
             list: [
-                { type: 'upload', label: 'original photos', prop: 'originalPhotos' },
-                { type: 'upload', label: 'floor plan', prop: 'floorPlan' },
-                { type: 'upload', label: 'ref image', prop: 'refImage' },
+                { type: 'upload', label: 'measure files', prop: 'measureFiles' },
                 { type: 'input', label: 'price range', prop: 'priceRange' },
                 { type: 'select', label: 'designer', prop: 'designer', opts: opts },
+                { type: 'textarea', label: 'note', prop: 'note' },
             ]
         };
     } else if (row.status == 3) {
-
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'upload', label: 'design files', prop: 'designFiles' },
+                { type: 'input', label: 'sale price', prop: 'salePrice' },
+                { type: 'upload', label: 'order files', prop: 'orderFiles', opts: opts },
+                { type: 'input', label: 'order note', prop: 'orderNote' },
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        };
     } else if (row.status == 4) {
-
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'upload', label: 'final files', prop: 'finalFiles' },
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        };
+    } else {
+        options.value = {
+            labelWidth: '100px',
+            span: 12,
+            list: [
+                { type: 'textarea', label: 'note', prop: 'note' }
+            ]
+        }
     }
-
-
-    rowData.value = { ...row };
-    isEdit.value = true;
+    rowData.value = {
+        ...row,
+    };
     visible.value = true;
 };
 
@@ -220,32 +300,24 @@ const handleView = (row: Customer) => {
     viewData.value.list = [
         {
             prop: 'id',
-            label: '用户ID',
+            label: 'customer id',
         },
         {
             prop: 'name',
-            label: '用户名',
+            label: 'name',
         },
         {
-            prop: 'password',
-            label: '密码',
+            prop: 'contact',
+            label: 'contact',
         },
         {
-            prop: 'email',
-            label: '邮箱',
+            prop: 'address',
+            label: 'address',
         },
         {
-            prop: 'phone',
-            label: '电话',
-        },
-        {
-            prop: 'role',
-            label: '角色',
-        },
-        {
-            prop: 'date',
-            label: '注册日期',
-        },
+            prop: 'note',
+            label: 'note',
+        }
     ]
     visible1.value = true;
 };

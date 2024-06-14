@@ -7,8 +7,7 @@ import { usePermissStore } from './store/permiss';
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import axios from 'axios';
-import { ElLoading } from 'element-plus';
-
+import { ElLoading,ElMessage } from 'element-plus';
 
 // 设置默认的基础 URL
 axios.defaults.baseURL = 'http://localhost:8080/';
@@ -51,14 +50,25 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.response.use(response => {
+  const data = response.data;
   if (loadingInstance) loadingInstance.close();
+  if (data.code === 200) {
+    return response
+} else {
+    if (data.code === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    } else {
+      console.log(data.msg);
+      ElMessage.error(!data.msg ? 'system error' : data.msg);
+    }
+    // 拒绝流程继续往下走
+    return Promise.reject(data.msg);
+}
   return response;
 }, error => {
   if (loadingInstance) loadingInstance.close();
-  if (error.response && error.response.status === 401) {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-  }
+  ElMessage.error(error.message);
   return Promise.reject(error);
 });
 
