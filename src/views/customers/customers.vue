@@ -2,8 +2,9 @@
 <template>
     <div>
         <div class="container">
-            <TableCustom :columns="columns" :tableData="tableData" :total="page.total" :viewFunc="handleView"
-                :delFunc="handleDelete" :page-change="changePage" :editFunc="handleEdit">
+            <TableCustom :columns="columns" :tableData="tableData" :total="page.total" :current-page="page.index"
+                :page-size="page.size" :viewFunc="handleView" :delFunc="handleDelete" :changePage="changePage"
+                :editFunc="handleEdit">
                 <template #toolbarBtn>
                     <el-button type="warning" :icon="CirclePlusFilled" @click="handleSave">New</el-button>
                 </template>
@@ -18,13 +19,13 @@
             <TableEdit :form-data="rowData" :options="options" :update="saveData" :updateWithStatus="submitData"
                 :changeVol="changeVol" />
         </el-dialog>
-        <el-dialog title="查看详情" v-model="visible1" width="900px" destroy-on-close>
-            <el-steps class="mb-4" style="max-width: 800px" :space="100" :active="1" simple>
+        <el-dialog v-model="visible1" width="900px" destroy-on-close>
+            <el-steps class="mb-4" style=" margin-bottom: 20px;" :space="100" :active="1" simple>
                 <el-step title="create" />
                 <el-step title="measure" />
                 <el-step title="design" />
-                <el-step title="produce" />
-                <el-step title="install" />
+                <el-step title="produce & install" />
+                <el-step title="complete" />
             </el-steps>
             <TableDetail :data="viewData"></TableDetail>
         </el-dialog>
@@ -45,7 +46,8 @@ import TableSearch from '@/components/table-search.vue';
 import { FormOption, FormOptionList } from '@/types/form-option';
 import axios from 'axios';
 
-
+const coWorkers = localStorage.getItem('coworkers');
+const region = localStorage.getItem('region');
 const router = useRouter();
 // 查询相关
 const query = reactive({
@@ -77,19 +79,26 @@ let columns = ref([
 // 获取所有用户, 保存到tableData中，以及分页处理
 const page = reactive({
     index: 1,
-    size: 10,
+    size: 20,
     total: 0,
 })
 const tableData = ref<Customer[]>([]);
 const getData = async () => {
-    const res = await axios.get('/customer/list');
-    tableData.value = res.data.data.map(item => ({
+    const res = await axios.get('/customer/list', {
+        params: {
+            page: page.index - 1,  // Spring Data JPA pages are 0-indexed
+            size: page.size,
+            salePlace: region,
+        }
+    });
+    tableData.value = res.data.data.items.map(item => ({
         ...item,
         statusString: statusMapping[item.status as number] || item.status,
         vol: statusMapping[item.status as number] || item.status,
     }));
-    page.total = res.data.pageTotal;
-
+    console.log(res);
+    page.total = res.data.data.total;
+    console.log(page.total);
 };
 getData();
 
@@ -99,8 +108,7 @@ const changePage = (val: number) => {
 };
 
 // dialog 里面内容
-const coWorkers = localStorage.getItem('coworkers');
-const usernmae = localStorage.getItem('vuems_name');
+
 // coworker select process
 const opts = coWorkers.split(',').map(username => ({
     key: username,
@@ -211,7 +219,7 @@ const changeVol = (val: string) => {
             ]
         }
     }
-   
+
 };
 //const initialFiles = ref({});
 // open dialog by edit button
@@ -315,9 +323,26 @@ const handleView = (row: Customer) => {
             label: 'address',
         },
         {
+            prop: 'cac',
+            label: 'Channels',
+        },
+        {
+            prop: 'salePlace',
+            label: 'salePlace',
+        },
+        {
+            prop: 'contact',
+            label: 'contact',
+        },
+        {
+            prop: 'address',
+            label: 'address',
+        },
+        {
             prop: 'note',
             label: 'note',
-        }
+        },
+        
     ]
     visible1.value = true;
 };

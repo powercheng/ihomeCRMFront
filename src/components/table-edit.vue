@@ -1,16 +1,16 @@
 <template>
 	<el-select v-model="form.vol" placeholder="change page" style="text-align: right; width: 150px; margin-bottom: 20px;" @change="changeVol">
-		<el-option label="creating" value="creating"></el-option>
-		<el-option label="measuring" value="measuring"></el-option>
-		<el-option label="designing" value="designing"></el-option>
-		<el-option label="producing" value="producing"></el-option>
-		<el-option label="complete" value="complete"></el-option>
+		<el-option label="create" value="create"></el-option>
+		<el-option label="measure" value="measure"></el-option>
+		<el-option label="design" value="design"></el-option>
+		<el-option label="produce & install" value="produce & install"></el-option>
+		<el-option label="finish" value="finish"></el-option>
 	</el-select>
-	<el-steps class="mb-4" style="max-width: 800px; margin-bottom: 20px;" :space="100" :active="form.status" simple>
-		<el-step title="creating" />
-		<el-step title="measuring" />
-		<el-step title="designing" />
-		<el-step title="producing & installing" />
+	<el-steps class="mb-4" style="margin-bottom: 20px;" :space="200" :active="form.status" simple>
+		<el-step title="create" />
+		<el-step title="measure" />
+		<el-step title="design" />
+		<el-step title="produce & install" />
 		<el-step title="finish" />
 	</el-steps>
 	<el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth">

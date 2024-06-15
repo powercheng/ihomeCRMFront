@@ -31,7 +31,7 @@
                 </div>
                 <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)">Sign</el-button>
                 <p class="login-text">
-                    Don't have an account?<el-link type="primary" @click="$router.push('/register')">Create an
+                    Don't have an account?  <el-link type="primary" @click="$router.push('/register')">Create an
                         account</el-link>
                 </p>
             </el-form>
@@ -93,6 +93,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 localStorage.setItem('vuems_name', param.username);
                 localStorage.setItem('token', response.data.data.token);
                 localStorage.setItem('coworkers', response.data.data.coworkers);
+                localStorage.setItem('region', response.data.data.region);
                 const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
                 permiss.handleSet(keys);
                 router.push('/');

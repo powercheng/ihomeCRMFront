@@ -16,6 +16,6 @@ const props = defineProps({
 		required: true,
 	}
 });
-const { row, title, column = 2, list } = props.data;
+const { row, title, column = 3, list } = props.data;
 
 </script>

@@ -26,19 +26,19 @@ export interface Register {
 }
 
 export const statusMapping: { [key: number]: string } = {
-    1: "creating",
-    2: "measuring",
-    3: "designing",
-    4: "producing",
-    5: "complete"
+    1: "create",
+    2: "measure",
+    3: "design",
+    4: "produce & install",
+    5: "Complete"
 };
 
 export const reverseStatusMapping: { [key: string]: number } = {
-    "creating": 1,
-    "measuring": 2,
-    "designing": 3,
-    "producing": 4,
-    "complete": 5
+    "create": 1,
+    "measure": 2,
+    "design": 3,
+    "produce & install": 4,
+    "Complete": 5
 };
 
 

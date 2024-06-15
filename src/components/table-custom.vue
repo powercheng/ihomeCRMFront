@@ -69,7 +69,7 @@
             </template>
         </el-table>
         <el-pagination v-if="hasPagination" :current-page="currentPage" :page-size="pageSize" :background="true"
-            :layout="layout" :total="total" @current-change="handleCurrentChange" />
+            :layout="layout" :total="total"  @current-change="handleCurrentChange" />
     </div>
 </template>
 
@@ -170,7 +170,9 @@ const handleSelectionChange = (selection: any[]) => {
 
 // 当前页码变化的事件
 const handleCurrentChange = (val: number) => {
-    props.changePage(val)
+
+    props.changePage(val);
+
 }
 
 const handleDelete = (row) => {

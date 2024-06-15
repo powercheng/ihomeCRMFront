@@ -7,7 +7,7 @@ import { usePermissStore } from './store/permiss';
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import axios from 'axios';
-import { ElLoading,ElMessage } from 'element-plus';
+import { ElLoading, ElMessage } from 'element-plus';
 
 // 设置默认的基础 URL
 axios.defaults.baseURL = 'http://localhost:8080/';
@@ -17,16 +17,16 @@ app.use(router);
 
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component);
+  app.component(key, component);
 }
 // 自定义权限指令
 const permiss = usePermissStore();
 app.directive('permiss', {
-    mounted(el, binding) {
-        if (binding.value && !permiss.key.includes(String(binding.value))) {
-            el['hidden'] = true;
-        }
-    },
+  mounted(el, binding) {
+    if (binding.value && !permiss.key.includes(String(binding.value))) {
+      el['hidden'] = true;
+    }
+  },
 });
 
 // loading
@@ -54,7 +54,7 @@ axios.interceptors.response.use(response => {
   if (loadingInstance) loadingInstance.close();
   if (data.code === 200) {
     return response
-} else {
+  } else {
     if (data.code === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
@@ -64,10 +64,11 @@ axios.interceptors.response.use(response => {
     }
     // 拒绝流程继续往下走
     return Promise.reject(data.msg);
-}
+  }
   return response;
 }, error => {
   if (loadingInstance) loadingInstance.close();
+  console.log(error);
   ElMessage.error(error.message);
   return Promise.reject(error);
 });
