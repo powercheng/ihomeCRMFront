@@ -1,17 +1,20 @@
 <template>
-	<el-select v-model="form.vol" placeholder="change page" style="text-align: right; width: 150px; margin-bottom: 20px;" @change="changeVol">
+	<el-select v-model="form.vol" placeholder="change page"
+		style="text-align: right; width: 150px; margin-bottom: 20px;" @change="changeVol">
 		<el-option label="create" value="create"></el-option>
 		<el-option label="measure" value="measure"></el-option>
 		<el-option label="design" value="design"></el-option>
-		<el-option label="produce & install" value="produce & install"></el-option>
-		<el-option label="finish" value="finish"></el-option>
+		<el-option label="order" value="order"></el-option>
+		<el-option label="produce" value="produce"></el-option>
+		<el-option label="install" value="install"></el-option>
 	</el-select>
-	<el-steps class="mb-4" style="margin-bottom: 20px;" :space="200" :active="form.status" simple>
+	<el-steps class="mb-4" style="margin-bottom: 20px;" :space="200" :active="form.status-1" simple>
 		<el-step title="create" />
 		<el-step title="measure" />
 		<el-step title="design" />
-		<el-step title="produce & install" />
-		<el-step title="finish" />
+		<el-step title="order" />
+		<el-step title="produce" />
+		<el-step title="install" />
 	</el-steps>
 	<el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth">
 		<el-row>
@@ -20,24 +23,25 @@
 					<!-- 文本框、数字框、下拉框、日期框、开关、上传 -->
 					<el-input v-if="item.type === 'input'" v-model="form[item.prop]" :disabled="item.disabled"
 						:placeholder="item.placeholder" clearable></el-input>
-					<el-input v-else-if="item.type === 'textarea'" type ="textarea" :autosize="{ minRows: 3}"  v-model="form[item.prop]" 
-						:placeholder="item.placeholder" clearable></el-input>
-					<el-input-number v-else-if="item.type === 'number'" v-model="form[item.prop]" :disabled="item.disabled"
-						controls-position="right"></el-input-number>
+					<el-input v-else-if="item.type === 'textarea'" type="textarea" :autosize="{ minRows: 3 }"
+						v-model="form[item.prop]" :placeholder="item.placeholder" clearable></el-input>
+					<el-input-number v-else-if="item.type === 'number'" v-model="form[item.prop]"
+						:disabled="item.disabled" controls-position="right"></el-input-number>
 					<el-select v-else-if="item.type === 'select'" v-model="form[item.prop]" :disabled="item.disabled"
 						:placeholder="item.placeholder" clearable>
 						<el-option v-for="opt in item.opts" :label="opt.label" :value="opt.value"></el-option>
 					</el-select>
 					<el-date-picker v-else-if="item.type === 'date'" type="date" v-model="form[item.prop]"
 						:value-format="item.format"></el-date-picker>
-					<el-date-picker v-else-if="item.type === 'datetime'" type="datetime" v-model="form[item.prop]" :placeholder="item.placeholder"
-						:value-format="item.format"></el-date-picker>
-					<el-switch v-else-if="item.type === 'switch'" v-model="form[item.prop]" :active-value="item.activeValue"
-						:inactive-value="item.inactiveValue" :active-text="item.activeText"
-						:inactive-text="item.inactiveText"></el-switch>
+					<el-date-picker v-else-if="item.type === 'datetime'" type="datetime" v-model="form[item.prop]"
+						:placeholder="item.placeholder" :value-format="item.format"></el-date-picker>
+					<el-switch v-else-if="item.type === 'switch'" v-model="form[item.prop]"
+						:active-value="item.activeValue" :inactive-value="item.inactiveValue"
+						:active-text="item.activeText" :inactive-text="item.inactiveText"></el-switch>
 
-					<el-upload v-else-if="item.type === 'upload'" class="avatar-uploader" multiple :show-file-list="true"
-						:http-request="uploadRequest(item.prop)" v-model:file-list="form[item.prop]" list-type="picture-card"
+					<el-upload v-else-if="item.type === 'upload'" class="avatar-uploader" multiple
+						:show-file-list="true" :http-request="uploadRequest(item.prop)"
+						v-model:file-list="form[item.prop]" list-type="picture-card"
 						:on-success="handleUploadSuccess(item.prop)">
 						<el-icon class="avatar-uploader-icon">
 							<Plus />
@@ -55,14 +59,15 @@
 
 		<el-form-item>
 			<el-button type="primary" @click="saveEdit(formRef)" style="margin-right: 20px;">save</el-button>
-			<el-button type="primary" @click="submitEdit(formRef)">submit to next</el-button>
+			<el-button type="primary" @click="submitEdit(formRef)" alert="are you sure submit to next coworker">submit
+				to next</el-button>
 		</el-form-item>
 	</el-form>
 </template>
 
 <script lang="ts" setup>
 import { FormOption } from '@/types/form-option';
-import { FormInstance, FormRules, UploadUserFile } from 'element-plus';
+import { FormInstance, FormRules, ElMessageBox } from 'element-plus';
 import { PropType, ref } from 'vue';
 import axios from 'axios';
 import { tr } from 'element-plus/es/locale';
@@ -88,10 +93,6 @@ const { options, formData, update, updateWithStatus, changeVol } = defineProps({
 		type: Function,
 		required: true
 	}
-
-
-
-
 });
 
 
@@ -118,7 +119,20 @@ const submitEdit = (formEl: FormInstance | undefined) => {
 	if (!formEl) return;
 	formEl.validate(valid => {
 		if (!valid) return false;
-		updateWithStatus(form.value);
+		ElMessageBox.confirm('Are you sure submit to next colleague', 'confirm', {
+			confirmButtonText: 'confirm',
+			cancelButtonText: 'cancel',
+			type: 'warning'
+		}).then(() => {
+			// 用户点击确定按钮后的操作，可以在这里执行提交操作
+			console.log('用户点击了确定按钮，执行提交操作');
+			updateWithStatus(form.value);
+			// 这里可以调用提交的方法或者执行提交逻辑
+		}).catch(() => {
+			// 用户点击取消按钮后的操作，一般情况下不需要处理
+			console.log('用户点击了取消按钮，取消提交操作');
+		});
+
 	});
 };
 
@@ -131,7 +145,7 @@ const uploadRequest = (prop) => async ({ file, onProgress, onSuccess, onError })
 	formData.append('file', file);
 
 	try {
-		const response = await axios.post('http://localhost:8080/upload/' + form.value.id + "/" + prop, formData, {
+		const response = await axios.post('/upload/' + form.value.id + "/" + prop, formData, {
 			onUploadProgress: (progressEvent) => {
 				const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
 				onProgress({ percent: percentCompleted });
@@ -149,10 +163,8 @@ const handleUploadSuccess = (prop: String) => (response: any, file: File, fileLi
 	// fileList 是当前文件列表数组
 
 
-	console.log(222);
 	// 更新 form[prop] 中的文件列表
 	//form.value[prop].push(uploadedFile);
-	console.log(fileList);
 	const seenNames = {};
 	const uniqueFiles = [];
 
@@ -160,8 +172,9 @@ const handleUploadSuccess = (prop: String) => (response: any, file: File, fileLi
 		if (!seenNames[file.name]) {
 			seenNames[file.name] = true;
 			uniqueFiles.push({
-				name:file.name,
-				url: "http://localhost:8080/" + form.value.id + "/" + prop + "/" + file.name});
+				name: file.name,
+				url: "http://192.168.0.200:8080/" + form.value.id + "/" + prop + "/" + file.name
+			});
 		}
 	});
 

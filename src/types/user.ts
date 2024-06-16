@@ -14,7 +14,7 @@ export interface Customer {
     address: string;
     cac: number;
     salesRep: string;
-    status: number | string;
+    status: number;
 }
 
 
@@ -29,16 +29,20 @@ export const statusMapping: { [key: number]: string } = {
     1: "create",
     2: "measure",
     3: "design",
-    4: "produce & install",
-    5: "Complete"
+    4: "order",
+    5: "produce",
+    6: "install",
+    7: "complete"
 };
 
 export const reverseStatusMapping: { [key: string]: number } = {
     "create": 1,
     "measure": 2,
     "design": 3,
-    "produce & install": 4,
-    "Complete": 5
+    "order": 4,
+    "produce": 5,
+    "install": 6,
+    "complete": 7
 };
 
 

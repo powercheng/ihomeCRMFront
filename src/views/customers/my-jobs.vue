@@ -15,7 +15,7 @@
                 :changeVol="changeVol" />
         </el-dialog>
         <el-dialog v-model="visible1" width="900px" destroy-on-close>
-            <el-steps class="mb-4" style=" margin-bottom: 20px;" :space="100" :active="viewData.row.status-1" simple>
+            <el-steps class="mb-4" style=" margin-bottom: 20px;" :space="100" :active="viewData.row.status" simple>
                 <el-step title="create" />
                 <el-step title="measure" />
                 <el-step title="design" />
@@ -65,12 +65,12 @@ let columns = ref([
     { prop: 'contact', label: 'contact' },
     { prop: 'address', label: 'address' },
     { prop: 'cac', label: 'Channels' },
-    { prop: 'saleRep', label: 'sale Rep' },
+    { prop: 'salesRep', label: 'sales Rep' },
     { prop: 'measurer', label: 'measurer' },
     { prop: 'designer', label: 'designer' },
     { prop: 'statusString', label: 'status' },
     { prop: 'createdAt', label: 'createdAt' },
-    { prop: 'operator', label: 'operaton', width: 260 },
+    { prop: 'operator', label: 'operaton', width: 250 },
 
 ])
 // 获取所有用户, 保存到tableData中，以及分页处理
@@ -104,12 +104,11 @@ const changePage = (val: number) => {
 
 // dialog 里面内容
 
-
-
-const opts = coWorkers.split(',').map(username => ({
-    key: username,
-    value: username,
-    label: username
+// coworker select process
+const opts = JSON.parse(coWorkers).map(item => ({
+    key: item.username,
+    value: item.username,
+    label: item.username
 }));
 // 初始化 options
 let options = ref<FormOption>();
@@ -126,7 +125,19 @@ const saveData = async (formEl: FormInstance | undefined) => {
 };
 //save a customer with status++
 const submitData = async (formEl: FormInstance | undefined) => {
-    const response = await axios.post('/customer/submit', formEl);
+    formEl.status++;
+    if (formEl.status == 2) {
+        formEl.measuredAt = new Date();
+    } else if (formEl.status == 3) {
+        formEl.designedAt = new Date();
+    } else if (formEl.status == 4) {
+        formEl.produced = new Date();
+    } else if (formEl.status == 5) {
+        formEl.installed = new Date();
+    } else {
+        formEl.finishedAt = new Date();
+    }
+    const response = await axios.post('/customer/save', formEl);
     ElMessage.success('success');
     visible.value = false;
     getData();
@@ -146,7 +157,7 @@ const handleSave = () => {
             { type: 'input', label: 'name', prop: 'name' },
             { type: 'input', label: 'contact', prop: 'contact' },
             { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
-            { type: 'select', label: 'sale Rep', prop: 'saleRep', opts: opts },
+            { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
             { type: 'select', label: 'measurer', prop: 'measurer', opts: opts },
             { type: 'input', label: 'address', prop: 'address' },
             { type: 'datetime', label: 'date', prop: 'measuredAt', placeholder: "measure time" },
@@ -165,7 +176,7 @@ const changeOption = (vol: number) => {
                 { type: 'input', label: 'name', prop: 'name' },
                 { type: 'input', label: 'contact', prop: 'contact' },
                 { type: 'input', label: 'Channels', prop: 'cac', placeholder: "Customer Acquisition Channels" },
-                { type: 'select', label: 'sale Rep', prop: 'saleRep', opts: opts },
+                { type: 'select', label: 'sales Rep', prop: 'salesRep', opts: opts },
                 { type: 'select', label: 'measurer', prop: 'measurer', opts: opts },
                 { type: 'input', label: 'address', prop: 'address' },
                 { type: 'datetime', label: 'date', prop: 'measuredAt', placeholder: "measure time" },
@@ -285,24 +296,24 @@ const handleView = (row: Customer) => {
         },
         {
             prop: 'cac',
-            label: 'customer acquisition channels',
+            label: 'Channels',
             type: 'string',
 
         },
         {
             prop: 'salePlace',
-            label: 'sale Place',
+            label: 'salePlace',
             type: 'string',
 
         },
         {
-            prop: 'saleRep',
-            label: 'sale representative',
+            prop: 'contact',
+            label: 'contact',
             type: 'string',
         },
         {
-            prop: 'measurer',
-            label: 'measure person',
+            prop: 'address',
+            label: 'address',
             type: 'string',
         },
         {

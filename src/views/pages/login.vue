@@ -81,22 +81,19 @@ const submitForm = (formEl: FormInstance | undefined) => {
         if (valid) {
 
                 const { username, password } = param;
-                console.log(username);
 
                 const response = await axios.post('/login', {
                     username: username,
                     password: password,
                 });
-                console.log('success');
-                console.log(response);
                 ElMessage.success('success');
-                localStorage.setItem('vuems_name', param.username);
+                localStorage.setItem('username', param.username);
                 localStorage.setItem('token', response.data.data.token);
                 localStorage.setItem('coworkers', response.data.data.coworkers);
                 localStorage.setItem('region', response.data.data.region);
                 const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
                 permiss.handleSet(keys);
-                router.push('/');
+                router.push('/customers');
                 if (checked.value) {
                     localStorage.setItem('login-param', JSON.stringify(param));
                 } else {

@@ -9,11 +9,16 @@ import './assets/css/icon.css';
 import axios from 'axios';
 import { ElLoading, ElMessage } from 'element-plus';
 
+
+
 // 设置默认的基础 URL
-axios.defaults.baseURL = 'http://localhost:8080/';
+axios.defaults.baseURL = 'http://192.168.0.200:8080/api';
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+
+
+
 
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -50,16 +55,19 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.response.use(response => {
+  console.log("interceptor success", response);
   const data = response.data;
   if (loadingInstance) loadingInstance.close();
   if (data.code === 200) {
     return response
   } else {
     if (data.code === 401) {
+      localStorage.removeItem('username');
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('coworkers');
+      localStorage.removeItem('region');
+      router.push('/login');
     } else {
-      console.log(data.msg);
       ElMessage.error(!data.msg ? 'system error' : data.msg);
     }
     // 拒绝流程继续往下走
@@ -67,8 +75,8 @@ axios.interceptors.response.use(response => {
   }
   return response;
 }, error => {
+  console.log("interceptor error", error)
   if (loadingInstance) loadingInstance.close();
-  console.log(error);
   ElMessage.error(error.message);
   return Promise.reject(error);
 });

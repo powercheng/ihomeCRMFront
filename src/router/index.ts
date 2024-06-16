@@ -15,14 +15,20 @@ const routes: RouteRecordRaw[] = [
                 path: '/customers',
                 name: 'customers',
                 meta: {
-                    title: '客户列表',
+                    title: 'customers',
                     noAuth: true,
                 },
                 component: () => import(/* webpackChunkName: "customers" */ '../views/customers/customers.vue'),
             },
-
-
-
+            {
+                path: '/my-jobs',
+                name: 'my jobs',
+                meta: {
+                    title: 'my jobs',
+                    noAuth: true,
+                },
+                component: () => import(/* webpackChunkName: "my-jobs" */ '../views/customers/my-jobs.vue'),
+            },
             {
                 path: '/dashboard',
                 name: 'dashboard',
@@ -282,7 +288,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     NProgress.start();
-    const role = localStorage.getItem('vuems_name');
+    const role = localStorage.getItem('username');
     const permiss = usePermissStore();
 
     if (!role && to.meta.noAuth !== true) {

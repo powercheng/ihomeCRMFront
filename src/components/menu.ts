@@ -169,12 +169,6 @@ export const menuData: Menus[] = [
         permiss: '5',
     },
     {
-        id: '7',
-        icon: 'Brush',
-        index: '/theme',
-        title: '主题',
-    },
-    {
         id: '6',
         icon: 'DocumentAdd',
         index: '6',
@@ -219,9 +213,29 @@ export const menuData: Menus[] = [
         ],
     },
     {
+        id: '7',
+        icon: 'Brush',
+        index: '/theme',
+        title: '主题',
+    },
+    {
         id: '8',
         icon: 'UserFilled',
-        index: '/customers',
-        title: '客户管理',
-    },
+        index: '8',
+        title: 'customer management',
+        children: [
+            {
+                id: '81',
+                pid: '8',
+                index: '/customers',
+                title: 'current customers',
+            },
+            {
+                id: '82',
+                pid: '8',
+                index: '/my-jobs',
+                title: 'my jobs',
+            },
+        ],
+    }
 ];

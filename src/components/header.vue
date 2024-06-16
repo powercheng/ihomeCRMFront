@@ -47,12 +47,12 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
+     <!--                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
                                 <el-dropdown-item>项目仓库</el-dropdown-item>
                             </a>
                             <a href="https://lin-xin.gitee.io/example/vuems-doc/" target="_blank">
                                 <el-dropdown-item>官方文档</el-dropdown-item>
-                            </a>
+                            </a> -->
                             <el-dropdown-item command="user">个人中心</el-dropdown-item>
                             <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
@@ -68,7 +68,7 @@ import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
 
-const username: string | null = localStorage.getItem('vuems_name');
+const username: string | null = localStorage.getItem('username');
 const message: number = 2;
 
 const sidebar = useSidebarStore();
@@ -87,7 +87,7 @@ onMounted(() => {
 const router = useRouter();
 const handleCommand = (command: string) => {
     if (command == 'loginout') {
-        localStorage.removeItem('vuems_name');
+        localStorage.removeItem('username');
         localStorage.removeItem('token');
         router.push('/login');
     } else if (command == 'user') {

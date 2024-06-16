@@ -16,6 +16,9 @@ export default defineConfig({
 			resolvers: [ElementPlusResolver()]
 		})
 	],
+	server: {
+		host: '0.0.0.0',
+	},
 	optimizeDeps: {
 		include: ['schart.js']
 	},
